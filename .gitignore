@@ -1,0 +1,25 @@
+# ROS2 build system
+build/
+install/
+log/
+.colcon/
+*.swp
+*.pyc
+__pycache__/
+
+# VSCode
+.vscode/
+
+# CMake files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# ROS bag files or logs
+*.bag
+*.db3
+
+# Secrets
+*.env
+*.secret
