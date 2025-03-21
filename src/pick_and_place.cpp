@@ -78,7 +78,7 @@ private:
     void set_io_signal(const std::string &signal_name, const std::string &value)
     {
         // Wait for service to be available, but timeout if it takes too long
-        if (!io_signal_client_->wait_for_service(std::chrono::seconds(5))) {
+        if (!io_signal_client_->wait_for_service(std::chrono::seconds(1))) {
             RCLCPP_ERROR(node_->get_logger(), "IO signal service is not available! Check if ABB RWS Client is running.");
             return;
         }
@@ -88,30 +88,11 @@ private:
         request->signal = signal_name;
         request->value = value;
 
-        // Call the service asynchronously
-        auto future = io_signal_client_->async_send_request(request);
+        auto result = io_signal_client_->async_send_request(request);
 
-        // Wait for the result (timeout after 5 seconds)
-        if (future.wait_for(std::chrono::seconds(5)) == std::future_status::ready)
-        {
-            try {
-                auto response = future.get();
-                if (response->result_code == 1) { // Success if result_code == 1, verified from terminal
-                    RCLCPP_INFO(node_->get_logger(), "Successfully set IO signal: %s to %s", signal_name.c_str(), value.c_str());
-                } else {
-                    RCLCPP_ERROR(node_->get_logger(), "Failed to set IO signal: %s. Error Code: %d, Message: %s", 
-                                signal_name.c_str(), response->result_code, response->message.c_str());
-                }
-            } catch (const std::exception &e) {
-                RCLCPP_ERROR(node_->get_logger(), "Exception while calling IO signal service: %s", e.what());
-            }
-        }
-        else {
-            RCLCPP_ERROR(node_->get_logger(), "Timeout waiting for IO signal service response!");
-        }
+        RCLCPP_INFO(node_->get_logger(), "SENT REQUEST");
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-        // Small delay to ensure IO is processed before continuing
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
     void move_to_joint_position(const std::vector<double> &joint_positions)
@@ -168,7 +149,6 @@ private:
 
         // Activate gripper (open)
         set_io_signal("ABB_Scalable_IO_0_DO1", "1");
-
         move_to_joint_position(pick_pose_);
 
         move_to_joint_position(pre_pick_pose_);
@@ -286,6 +266,9 @@ int main(int argc, char *argv[])
     std::vector<double> target_pose1 = {middle_line - 0.251};
     auto move_line1 = std::make_shared<MoveLine>(node, target_pose1);
 
+    // Wait a few seconds to allow the launch process to initialize
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
     // First Pick & Place set
     std::vector<double> home_pose1 = {(-90.31 + correct_rotation) * M_PI / 180.0, 11.78 * M_PI / 180.0, 0.21 * M_PI / 180.0, 0.28 * M_PI / 180.0, 76.70 * M_PI / 180.0, -20.20 * M_PI / 180.0};
     std::vector<double> pre_pick_pose1 = {(-15.50 + correct_rotation) * M_PI / 180.0, 53.11 * M_PI / 180.0, -16.97 * M_PI / 180.0, 0.00 * M_PI / 180.0, 53.85 * M_PI / 180.0, -195.50 * M_PI / 180.0};
@@ -296,9 +279,19 @@ int main(int argc, char *argv[])
     bool use_cartesian1 = false;
     auto pick_and_place1 = std::make_shared<PickAndPlace>(node, use_cartesian1, home_pose1, pre_pick_pose1, pick_pose1, pre_place_pose1, place_pose1);
     
+
+//    rclcpp::shutdown();
+//    return 0;
+
+    // Wait a few seconds to allow the launch process to initialize
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
     // Move the line to the second position
     std::vector<double> target_pose2 = {middle_line - 0.269};
     auto move_line2 = std::make_shared<MoveLine>(node, target_pose2);
+
+    // Wait a few seconds to allow the launch process to initialize
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
     // Second Pick&Place set
     std::vector<double> home_pose2 = {(-90.31 + correct_rotation) * M_PI / 180.0, 11.78 * M_PI / 180.0, 0.21 * M_PI / 180.0, 0.28 * M_PI / 180.0, 76.70 * M_PI / 180.0, -20.20 * M_PI / 180.0};
@@ -310,9 +303,15 @@ int main(int argc, char *argv[])
     bool use_cartesian2 = false;
     auto pick_and_place2 = std::make_shared<PickAndPlace>(node, use_cartesian2, home_pose2, pre_pick_pose2, pick_pose2, pre_place_pose2, place_pose2);
 
+    // Wait a few seconds to allow the launch process to initialize
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
     // Move the line to the third position
     std::vector<double> target_pose3 = {middle_line - 0.270};
     auto move_line3 = std::make_shared<MoveLine>(node, target_pose3);
+
+    // Wait a few seconds to allow the launch process to initialize
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
     // Third Pick&Place set
     std::vector<double> home_pose3 = {(-90.31 + correct_rotation) * M_PI / 180.0, 11.78 * M_PI / 180.0, 0.21 * M_PI / 180.0, 0.28 * M_PI / 180.0, 76.70 * M_PI / 180.0, -20.20 * M_PI / 180.0};
@@ -326,11 +325,15 @@ int main(int argc, char *argv[])
 
     
     //The second three Pick&Place operations are for the smaller boxes
-    
+    // Wait a few seconds to allow the launch process to initialize
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
     // Move the line to the fourth position
     std::vector<double> target_pose4 = {middle_line + 0.150};
     auto move_line4 = std::make_shared<MoveLine>(node, target_pose4);
+
+    // Wait a few seconds to allow the launch process to initialize
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
     // Fourth Pick & Place set
     std::vector<double> home_pose4 = {(-90.31 + correct_rotation) * M_PI / 180.0, 11.78 * M_PI / 180.0, 0.21 * M_PI / 180.0, 0.28 * M_PI / 180.0, 76.70 * M_PI / 180.0, -20.20 * M_PI / 180.0};
@@ -342,9 +345,15 @@ int main(int argc, char *argv[])
     bool use_cartesian4 = false;
     auto pick_and_place4 = std::make_shared<PickAndPlace>(node, use_cartesian4, home_pose4, pre_pick_pose4, pick_pose4, pre_place_pose4, place_pose4);
 
+    // Wait a few seconds to allow the launch process to initialize
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
     // Move the line to the fifth position
     std::vector<double> target_pose5 = {middle_line + 0.262};
     auto move_line5 = std::make_shared<MoveLine>(node, target_pose5);
+
+    // Wait a few seconds to allow the launch process to initialize
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
     // Fifth Pick&Place set
     std::vector<double> home_pose5 = {(-90.31 + correct_rotation) * M_PI / 180.0, 11.78 * M_PI / 180.0, 0.21 * M_PI / 180.0, 0.28 * M_PI / 180.0, 76.70 * M_PI / 180.0, -20.20 * M_PI / 180.0};
@@ -356,9 +365,15 @@ int main(int argc, char *argv[])
     bool use_cartesian5 = false;
     auto pick_and_place5 = std::make_shared<PickAndPlace>(node, use_cartesian5, home_pose5, pre_pick_pose5, pick_pose5, pre_place_pose5, place_pose5);
 
+    // Wait a few seconds to allow the launch process to initialize
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
     // Move the line to the sixth position
     std::vector<double> target_pose6 = {middle_line + 0.290};
     auto move_line6 = std::make_shared<MoveLine>(node, target_pose6);
+
+    // Wait a few seconds to allow the launch process to initialize
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
     // Sixth Pick&Place set
     std::vector<double> home_pose6 = {(-90.31 + correct_rotation) * M_PI / 180.0, 11.78 * M_PI / 180.0, 0.21 * M_PI / 180.0, 0.28 * M_PI / 180.0, 76.70 * M_PI / 180.0, -20.20 * M_PI / 180.0};

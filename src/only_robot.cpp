@@ -63,7 +63,7 @@ private:
     void set_io_signal(const std::string &signal_name, const std::string &value)
     {
         // Wait for service to be available, but timeout if it takes too long
-        if (!io_signal_client_->wait_for_service(std::chrono::seconds(5))) {
+        if (!io_signal_client_->wait_for_service(std::chrono::seconds(1))) {
             RCLCPP_ERROR(node_->get_logger(), "IO signal service is not available! Check if ABB RWS Client is running.");
             return;
         }
@@ -73,30 +73,11 @@ private:
         request->signal = signal_name;
         request->value = value;
 
-        // Call the service asynchronously
-        auto future = io_signal_client_->async_send_request(request);
+        auto result = io_signal_client_->async_send_request(request);
 
-        // Wait for the result (timeout after 5 seconds)
-        if (future.wait_for(std::chrono::seconds(5)) == std::future_status::ready)
-        {
-            try {
-                auto response = future.get();
-                if (response->result_code == 1) { // Success if result_code == 1, verified from terminal
-                    RCLCPP_INFO(node_->get_logger(), "Successfully set IO signal: %s to %s", signal_name.c_str(), value.c_str());
-                } else {
-                    RCLCPP_ERROR(node_->get_logger(), "Failed to set IO signal: %s. Error Code: %d, Message: %s", 
-                                signal_name.c_str(), response->result_code, response->message.c_str());
-                }
-            } catch (const std::exception &e) {
-                RCLCPP_ERROR(node_->get_logger(), "Exception while calling IO signal service: %s", e.what());
-            }
-        }
-        else {
-            RCLCPP_ERROR(node_->get_logger(), "Timeout waiting for IO signal service response!");
-        }
+        RCLCPP_INFO(node_->get_logger(), "SENT REQUEST");
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-        // Small delay to ensure IO is processed before continuing
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
 
@@ -120,6 +101,9 @@ private:
     {
         move_to_joint_position(home_pose_);
         move_to_joint_position(pre_pick_pose_);
+
+        RCLCPP_INFO(node_->get_logger(), "Start.");
+
 
         // Activate gripper (open)
         set_io_signal("ABB_Scalable_IO_0_DO1", "1");
@@ -183,7 +167,7 @@ int main(int argc, char *argv[])
     // Wait a few seconds to allow the launch process to initialize
     std::this_thread::sleep_for(std::chrono::seconds(5));
 
-    double correct_rotation = -90.0; // degrees
+    double correct_rotation = 90.0; // degrees
 
     // Define pick and place positions
     std::vector<double> home_pose1 = {(-90.31 + correct_rotation) * M_PI / 180.0, 11.78 * M_PI / 180.0, 0.21 * M_PI / 180.0, 0.28 * M_PI / 180.0, 76.70 * M_PI / 180.0, -20.20 * M_PI / 180.0};
