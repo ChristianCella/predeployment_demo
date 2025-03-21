@@ -22,7 +22,7 @@ find_package(abb_robot_msgs REQUIRED)
 # Include directories
 # --------------------------------------------------
 include_directories(
-  include
+  #include
   ${rclcpp_INCLUDE_DIRS}
   ${moveit_ros_planning_interface_INCLUDE_DIRS}
   ${moveit_core_INCLUDE_DIRS}
@@ -81,9 +81,9 @@ install(PROGRAMS
 # --------------------------------------------------
 # Export include directory (if you add headers later)
 # --------------------------------------------------
-install(DIRECTORY include/
-  DESTINATION include/
-)
+#install(DIRECTORY include/
+#  DESTINATION include/
+#)
 
 # --------------------------------------------------
 # Optional: Enable testing and linters
