@@ -2,8 +2,8 @@
 #include <vector>
 #include <cmath>
 #include <chrono>
-#include <cstdlib>  // Required for std::system()
-#include <thread>   // For sleep
+#include <cstdlib>
+#include <thread>
 #include <iostream>
 
 #include <rclcpp/rclcpp.hpp>

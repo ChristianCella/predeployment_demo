@@ -13,6 +13,7 @@ using namespace std::chrono_literals;
 
 /*
 This class computes the manipulability measure of the robot manipulator.
+For the moment this is a stand-alone code. WIP!!
 */
 
 class ManipulabilityAnalyzer
